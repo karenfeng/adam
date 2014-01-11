@@ -41,13 +41,13 @@ object TrackedLayout {
   }
 }
 
-class TrackedLayout(_reads: Traversable[ADAMRecord]) {
+class TrackedLayout(val reads: Traversable[ADAMRecord]) {
 
   import TrackedLayout._
 
   private val trackBuilder = new mutable.ListBuffer[Track]()
 
-  _reads.toSeq.sortWith(recordSorter).foreach(findAndAddToTrack)
+  reads.toSeq.foreach(findAndAddToTrack)
 
   val numTracks = trackBuilder.size
   val trackAssignments = Map(trackBuilder.toList.zip(0 to numTracks).flatMap {

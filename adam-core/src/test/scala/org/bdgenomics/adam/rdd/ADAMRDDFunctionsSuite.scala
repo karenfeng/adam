@@ -39,12 +39,13 @@ import scala.util.Random
 
 class ADAMRDDFunctionsSuite extends SparkFunSuite {
 
-  def buildADAMRecord(refName : String, start : Long, cigar : String) : ADAMRecord = {
+  def buildADAMRecord(refName: String, start: Long, cigar: String): ADAMRecord = {
     val contig = ADAMContig.newBuilder().setContigName(refName).build()
     ADAMRecord.newBuilder()
       .setContig(contig)
       .setCigar(cigar)
       .setStart(start)
+      .setReadMapped(true)
       .build()
   }
 
