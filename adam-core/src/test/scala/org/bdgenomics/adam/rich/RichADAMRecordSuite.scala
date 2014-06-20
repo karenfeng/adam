@@ -18,9 +18,10 @@
 package org.bdgenomics.adam.rich
 
 import org.scalatest.FunSuite
-import org.bdgenomics.adam.avro.{ ADAMContig, ADAMRecord }
+import org.bdgenomics.adam.avro.{ ADAMContig, ADAMRecord, AttributeValue, TagType }
 import RichADAMRecord._
-import org.bdgenomics.adam.models.{ ReferencePosition, TagType, Attribute }
+import org.bdgenomics.adam.models.ReferencePosition
+import scala.collection.JavaConverters._
 
 class RichADAMRecordSuite extends FunSuite {
 
@@ -88,10 +89,10 @@ class RichADAMRecordSuite extends FunSuite {
 
   test("tags contains optional fields") {
     val contig = ADAMContig.newBuilder.setContigName("chr1").build
-    val rec = ADAMRecord.newBuilder().setAttributes("XX:i:3\tYY:Z:foo").setContig(contig).build()
+    val rec = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("XX" -> new AttributeValue(TagType.i, 3), "YY" -> new AttributeValue(TagType.Z, "foo")).asJava).setContig(contig).build()
     assert(rec.tags.size === 2)
-    assert(rec.tags(0) === Attribute("XX", TagType.Integer, 3))
-    assert(rec.tags(1) === Attribute("YY", TagType.String, "foo"))
+    assert(rec.tags(0) === ("XX" -> new AttributeValue(TagType.i, 3)))
+    assert(rec.tags(1) === ("YY" -> new AttributeValue(TagType.Z, "foo")))
   }
 
   test("Reference Positions") {

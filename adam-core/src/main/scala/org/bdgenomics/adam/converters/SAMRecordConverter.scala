@@ -19,10 +19,9 @@ package org.bdgenomics.adam.converters
 
 import net.sf.samtools.{ SAMReadGroupRecord, SAMRecord }
 
-import org.bdgenomics.adam.avro.ADAMRecord
+import org.bdgenomics.adam.avro.{ ADAMRecord, AttributeValue, TagType }
 import scala.collection.JavaConverters._
-import org.bdgenomics.adam.models.{ SequenceRecord, Attribute, RecordGroupDictionary, SequenceDictionary }
-import org.bdgenomics.adam.util.AttributeUtils
+import org.bdgenomics.adam.models._
 
 class SAMRecordConverter extends Serializable {
   def convert(samRecord: SAMRecord, dict: SequenceDictionary, readGroups: RecordGroupDictionary): ADAMRecord = {
@@ -137,7 +136,7 @@ class SAMRecordConverter extends Serializable {
     }
 
     if (samRecord.getAttributes != null) {
-      var tags = List[Attribute]()
+      var tags = Map[CharSequence, AttributeValue]()
       samRecord.getAttributes.asScala.foreach {
         attr =>
           if (attr.tag == "MD") {
@@ -145,10 +144,10 @@ class SAMRecordConverter extends Serializable {
           } else if (attr.tag == "OQ") {
             builder.setOrigQual(attr.value.toString)
           } else {
-            tags ::= AttributeUtils.convertSAMTagAndValue(attr)
+            tags += attr.tag -> new AttributeValue(TagType.valueOf(matchType(attr.value)), attr.value)
           }
       }
-      builder.setAttributes(tags.mkString("\t"))
+      builder.setOptFields(tags.asJava)
     }
 
     val recordGroup: SAMReadGroupRecord = samRecord.getReadGroup
@@ -172,6 +171,14 @@ class SAMRecordConverter extends Serializable {
     }
 
     builder.build
+  }
+
+  def matchType(x: AnyRef): String = x match {
+    case a: java.lang.Character => "A"
+    case a: java.lang.Integer   => "i"
+    case a: java.lang.Float     => "f"
+    case a: java.lang.String    => "Z"
+    case Array(_*)              => "B"
   }
 
 }

@@ -398,7 +398,7 @@ class ADAMRecordRDDFunctions(rdd: RDD[ADAMRecord]) extends ADAMSequenceDictionar
    * @return An RDD of attribute name / count pairs.
    */
   def adamCharacterizeTags(): RDD[(String, Long)] = {
-    rdd.flatMap(RichADAMRecord(_).tags.map(attr => (attr.tag, 1L))).reduceByKey(_ + _)
+    rdd.flatMap(RichADAMRecord(_).tags.map(attr => (attr._1.toString, 1L))).reduceByKey(_ + _)
   }
 
   /**
@@ -408,10 +408,10 @@ class ADAMRecordRDDFunctions(rdd: RDD[ADAMRecord]) extends ADAMSequenceDictionar
    * @param tag The name of the optional field whose values are to be counted.
    * @return A Map whose keys are the values of the tag, and whose values are the number of time each tag-value occurs.
    */
-  def adamCharacterizeTagValues(tag: String): Map[Any, Long] = {
-    adamFilterRecordsWithTag(tag).flatMap(RichADAMRecord(_).tags.find(_.tag == tag)).map(
-      attr => Map(attr.value -> 1L)).reduce {
-        (map1: Map[Any, Long], map2: Map[Any, Long]) =>
+  def adamCharacterizeTagValues(tag: String): Map[AnyRef, Long] = {
+    adamFilterRecordsWithTag(tag).flatMap(RichADAMRecord(_).tags.find(_._1 == tag)).map(
+      attr => Map(attr._2.tagValue -> 1L)).reduce {
+        (map1: Map[AnyRef, Long], map2: Map[AnyRef, Long]) =>
           MapTools.add(map1, map2)
       }
   }
@@ -424,7 +424,7 @@ class ADAMRecordRDDFunctions(rdd: RDD[ADAMRecord]) extends ADAMSequenceDictionar
   def adamFilterRecordsWithTag(tagName: String): RDD[ADAMRecord] = {
     assert(tagName.length == 2,
       "withAttribute takes a tagName argument of length 2; tagName=\"%s\"".format(tagName))
-    rdd.filter(RichADAMRecord(_).tags.exists(_.tag == tagName))
+    rdd.filter(RichADAMRecord(_).tags.exists(_._1 == tagName))
   }
 
   /**

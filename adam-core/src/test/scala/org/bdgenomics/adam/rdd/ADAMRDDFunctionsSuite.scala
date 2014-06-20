@@ -25,12 +25,11 @@ import org.bdgenomics.adam.avro.{
   ADAMPileup,
   ADAMVariant,
   ADAMRecord,
-  Base
+  AttributeValue,
+  Base,
+  TagType
 }
-import org.bdgenomics.adam.models.{
-  ADAMVariantContext,
-  ReferenceRegion
-}
+import org.bdgenomics.adam.models.{ ADAMVariantContext, ReferenceRegion }
 import org.bdgenomics.adam.util.SparkFunSuite
 import org.bdgenomics.adam.rdd.ADAMContext._
 import org.bdgenomics.adam.rdd.variation.ADAMVariationContext._
@@ -459,7 +458,7 @@ class ADAMRDDFunctionsSuite extends SparkFunSuite {
     val tagCounts: Map[String, Long] = Map("XT" -> 10L, "XU" -> 9L, "XV" -> 8L)
     val readItr: Iterable[ADAMRecord] =
       for ((tagName, tagCount) <- tagCounts; i <- 0 until tagCount.toInt)
-        yield ADAMRecord.newBuilder().setAttributes("%s:i:%d".format(tagName, i)).build()
+        yield ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue](tagName -> new AttributeValue(TagType.i, i))).build()
 
     val reads = sc.parallelize(readItr.toSeq)
     val mapCounts: Map[String, Long] = Map(reads.adamCharacterizeTags().collect(): _*)
@@ -468,9 +467,9 @@ class ADAMRDDFunctionsSuite extends SparkFunSuite {
   }
 
   sparkTest("withTag returns only those records which have the appropriate tag") {
-    val r1 = ADAMRecord.newBuilder().setAttributes("XX:i:3").build()
-    val r2 = ADAMRecord.newBuilder().setAttributes("XX:i:4\tYY:i:10").build()
-    val r3 = ADAMRecord.newBuilder().setAttributes("YY:i:20").build()
+    val r1 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("XX" -> new AttributeValue(TagType.i, 3))).build()
+    val r2 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("XX" -> new AttributeValue(TagType.i, 4), "YY" -> new AttributeValue(TagType.i, 10))).build()
+    val r3 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("YY" -> new AttributeValue(TagType.i, 20))).build()
 
     val rdd = sc.parallelize(Seq(r1, r2, r3))
     assert(rdd.count() === 3)
@@ -484,9 +483,9 @@ class ADAMRDDFunctionsSuite extends SparkFunSuite {
   }
 
   sparkTest("withTag, when given a tag name that doesn't exist in the input, returns an empty RDD") {
-    val r1 = ADAMRecord.newBuilder().setAttributes("XX:i:3").build()
-    val r2 = ADAMRecord.newBuilder().setAttributes("XX:i:4\tYY:i:10").build()
-    val r3 = ADAMRecord.newBuilder().setAttributes("YY:i:20").build()
+    val r1 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("XX" -> new AttributeValue(TagType.i, 3))).build()
+    val r2 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("XX" -> new AttributeValue(TagType.i, 4), "YY" -> new AttributeValue(TagType.i, 10))).build()
+    val r3 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("YY" -> new AttributeValue(TagType.i, 20))).build()
 
     val rdd = sc.parallelize(Seq(r1, r2, r3))
     assert(rdd.count() === 3)
@@ -496,17 +495,17 @@ class ADAMRDDFunctionsSuite extends SparkFunSuite {
   }
 
   sparkTest("characterizeTagValues counts distinct values of a tag") {
-    val r1 = ADAMRecord.newBuilder().setAttributes("XX:i:3").build()
-    val r2 = ADAMRecord.newBuilder().setAttributes("XX:i:4\tYY:i:10").build()
-    val r3 = ADAMRecord.newBuilder().setAttributes("YY:i:20").build()
-    val r4 = ADAMRecord.newBuilder().setAttributes("XX:i:4").build()
+    val r1 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("XX" -> new AttributeValue(TagType.i, 3))).build()
+    val r2 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("XX" -> new AttributeValue(TagType.i, 4), "YY" -> new AttributeValue(TagType.i, 10))).build()
+    val r3 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("YY" -> new AttributeValue(TagType.i, 20))).build()
+    val r4 = ADAMRecord.newBuilder().setOptFields(Map[CharSequence, AttributeValue]("XX" -> new AttributeValue(TagType.i, 4))).build()
 
     val rdd = sc.parallelize(Seq(r1, r2, r3, r4))
     val tagValues = rdd.adamCharacterizeTagValues("XX")
 
     assert(tagValues.keys.size === 2)
-    assert(tagValues(4) === 2)
-    assert(tagValues(3) === 1)
+    assert(tagValues(scala.Int.box(4)) === 2)
+    assert(tagValues(scala.Int.box(3)) === 1)
   }
 
   sparkTest("characterizeTags counts tags in a SAM file correctly") {

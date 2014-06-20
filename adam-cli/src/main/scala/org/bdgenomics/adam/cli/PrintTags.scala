@@ -66,7 +66,7 @@ class PrintTags(protected val args: PrintTagsArgs) extends ADAMSparkCommand[Prin
 
     if (args.list != null) {
       val count = args.list.toInt
-      filtered.take(count).map(_.getAttributes).foreach(println)
+      filtered.take(count).map(_.getOptFields).foreach(println)
     }
 
     val tagCounts = filtered.adamCharacterizeTags().collect()

@@ -17,14 +17,14 @@
  */
 package org.bdgenomics.adam.rich
 
-import org.bdgenomics.adam.avro.ADAMRecord
+import org.bdgenomics.adam.avro.{ ADAMRecord, AttributeValue }
 import net.sf.samtools.{ CigarElement, CigarOperator, Cigar, TextCigarCodec }
 import org.bdgenomics.adam.rdd.ADAMContext._
 import org.bdgenomics.adam.util._
-import scala.Some
 import scala.collection.immutable.NumericRange
-import org.bdgenomics.adam.models.{ ReferenceRegion, ReferencePosition, Attribute }
+import org.bdgenomics.adam.models.{ ReferenceRegion, ReferencePosition }
 import java.util.regex.Pattern
+import scala.collection.JavaConverters._
 
 object RichADAMRecord {
   val CIGAR_CODEC: TextCigarCodec = TextCigarCodec.getSingleton
@@ -76,8 +76,7 @@ class RichADAMRecord(val record: ADAMRecord) {
   // Returns the quality scores as a list of bytes
   lazy val qualityScores: Array[Int] = record.getQual.toString.toCharArray.map(q => (q - 33))
 
-  // Parse the tags ("key:type:value" triples)
-  lazy val tags: Seq[Attribute] = AttributeUtils.parseAttributes(record.getAttributes.toString)
+  lazy val tags: Seq[(CharSequence, AttributeValue)] = record.getOptFields.asScala.toSeq
 
   // Parses the readname to Illumina optics information
   lazy val illuminaOptics: Option[IlluminaOptics] = {

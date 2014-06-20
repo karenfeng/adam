@@ -123,7 +123,7 @@ class ADAMRecordConverter extends Serializable {
     if (adamRecord.getAttributes != null) {
       val mp = RichADAMRecord(adamRecord).tags
       mp.foreach(a => {
-        builder.setAttribute(a.tag, a.value)
+        builder.setAttribute(a._1, a._2.tagValue)
       })
     }
 

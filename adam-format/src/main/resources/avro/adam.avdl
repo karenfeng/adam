@@ -10,6 +10,20 @@ record ADAMContig {
   union { null, string } species = null;
 }
 
+enum TagType {
+    // These String values come from the SAM file format spec: http://samtools.sourceforge.net/SAMv1.pdf
+    A, // character
+    i, // integer
+    f, // float
+    Z, // string
+    B  // numeric sequence
+}
+
+record AttributeValue {
+    TagType tagType;
+    union {null, int, float, double, bytes, string, array<long>} tagValue = null;
+}
+
 record ADAMRecord {
 
     /**
@@ -67,7 +81,10 @@ record ADAMRecord {
     // Remaining optional attributes flattened into a string
     union { null, string } attributes = null;
 
-    // record group identifer from sequencing run
+    // Remaining optional fields
+    union { null, map<AttributeValue> } optFields = null;
+
+    // record group identifier from sequencing run
     union { null, string } recordGroupSequencingCenter = null;
     union { null, string } recordGroupDescription = null;
     union { null, long } recordGroupRunDateEpoch = null;
