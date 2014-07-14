@@ -20,7 +20,7 @@ package org.bdgenomics.adam.rdd
 import org.bdgenomics.adam.util.SparkFunSuite
 import org.bdgenomics.adam.rdd.ADAMContext._
 import org.apache.spark.rdd.RDD
-import org.bdgenomics.adam.avro.ADAMRecord
+import org.bdgenomics.formats.avro.ADAMRecord
 import org.bdgenomics.adam.algorithms.realignmenttarget.RealignmentTargetFinder
 import org.bdgenomics.adam.algorithms.realignmenttarget.IndelRealignmentTarget
 import org.bdgenomics.adam.models.Consensus
@@ -70,7 +70,7 @@ class RealignIndelsSuite extends SparkFunSuite {
           {
             if (read.getStart <= 25) {
               var result: Boolean = (2 == target.indelSet.size.toInt)
-              result = result && (target.getReadRange().start.toLong <= read.start.toLong)
+              result = result && (target.getReadRange().start.toLong <= read.getStart.toLong)
               result && (target.getReadRange().end >= read.end.get - 1L)
             } else {
               target.isEmpty

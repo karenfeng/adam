@@ -19,7 +19,7 @@ package org.bdgenomics.adam.rdd
 
 import org.bdgenomics.adam.models.{ ReferencePosition, SequenceRecord, SequenceDictionary }
 import org.bdgenomics.adam.util.SparkFunSuite
-import org.bdgenomics.adam.avro.{ ADAMContig, ADAMRecord }
+import org.bdgenomics.formats.avro.{ ADAMContig, ADAMRecord }
 import org.bdgenomics.adam.rdd.ADAMContext._
 import org.bdgenomics.adam.projections.Projection
 
@@ -74,7 +74,7 @@ class GenomicRegionPartitionerSuite extends SparkFunSuite {
     val count = 1000
     val pos = sc.parallelize((1 to count).map(i => adamRecord("chr1", "read_%d".format(i), rand.nextInt(100), readMapped = true)))
     val parts = 200
-    val pairs = pos.map(p => (ReferencePosition(p.contig.getContigName, p.getStart), p))
+    val pairs = pos.map(p => (ReferencePosition(p.getContig.getContigName, p.getStart), p))
     val parter = new RangePartitioner(parts, pairs)
     val partitioned = pairs.sortByKey().partitionBy(parter)
 

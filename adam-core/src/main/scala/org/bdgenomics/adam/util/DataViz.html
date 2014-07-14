@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Genome visualization for ADAM</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8">
+    </script>
+    <style>
+        body { font: 12px Arial;}
+        path {
+            stroke: steelblue;
+            stroke-width: 2;
+            fill: none;
+        }
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: grey;
+            stroke-width: 1;
+            shape-rendering: crispEdges;
+        }
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 60px;
+            height: 28px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Genome visualization for ADAM</h1>
+<script src="DataViz.js">
+</script>
+<div id="right">
+    <input name="Move right button"
+           type="button"
+           value="right"
+           onclick="moveRight()"/>
+</div>
+</body>
+</html>

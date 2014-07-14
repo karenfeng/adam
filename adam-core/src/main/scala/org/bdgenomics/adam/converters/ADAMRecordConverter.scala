@@ -17,7 +17,7 @@
  */
 package org.bdgenomics.adam.converters
 
-import org.bdgenomics.adam.avro.ADAMRecord
+import org.bdgenomics.formats.avro.ADAMRecord
 import org.bdgenomics.adam.models.{
   SAMFileHeaderWritable,
   SequenceDictionary,
@@ -58,6 +58,8 @@ class ADAMRecordConverter extends Serializable {
       .foreach(v => builder.setAttribute("LB", v.toString))
     Option(adamRecord.getRecordGroupPlatformUnit)
       .foreach(v => builder.setAttribute("PU", v.toString))
+    Option(adamRecord.getRecordGroupSample)
+      .foreach(v => builder.setAttribute("SM", v.toString))
 
     // set the reference name, and alignment position, for mate
     Option(adamRecord.getMateReference)
@@ -142,11 +144,7 @@ class ADAMRecordConverter extends Serializable {
     val samSequenceDictionary = sd.toSAMSequenceDictionary()
     val samHeader = new SAMFileHeader
     samHeader.setSequenceDictionary(samSequenceDictionary)
-    rgd.readGroups.foreach(kv => {
-      val (_, name) = kv
-      val nextMember = new SAMReadGroupRecord(name.toString)
-      samHeader.addReadGroup(nextMember)
-    })
+    rgd.recordGroups.foreach(group => samHeader.addReadGroup(group.toSAMReadGroupRecord))
 
     samHeader
   }

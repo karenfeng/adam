@@ -21,7 +21,14 @@ import fi.tkk.ics.hadoop.bam.SAMRecordWritable
 import net.sf.samtools.SAMFileHeader
 import org.apache.hadoop.io.LongWritable
 import org.apache.spark.broadcast.Broadcast
+<<<<<<< HEAD
 import org.bdgenomics.adam.avro.{
+=======
+import org.apache.spark.Logging
+import org.apache.spark.SparkContext._
+import org.apache.spark.rdd.RDD
+import org.bdgenomics.formats.avro.{
+>>>>>>> upstream/master
   ADAMPileup,
   ADAMRecord,
   ADAMNucleotideContigFragment
@@ -29,6 +36,7 @@ import org.bdgenomics.adam.avro.{
 import org.bdgenomics.adam.converters.ADAMRecordConverter
 import org.bdgenomics.adam.models.{
   ADAMRod,
+  RecordGroup,
   RecordGroupDictionary,
   ReferencePosition,
   ReferenceRegion,
@@ -69,7 +77,6 @@ class ADAMRDDFunctions[T <% SpecificRecord: Manifest](rdd: RDD[T]) extends Seria
                disableDictionaryEncoding: Boolean = false): RDD[T] = {
     val job = HadoopUtil.newJob(rdd.context)
     ParquetLogger.hadoopLoggerLevel(Level.SEVERE)
-    ParquetOutputFormat.setWriteSupportClass(job, classOf[AvroWriteSupport])
     ParquetOutputFormat.setCompression(job, compressCodec)
     ParquetOutputFormat.setEnableDictionary(job, !disableDictionaryEncoding)
     ParquetOutputFormat.setBlockSize(job, blockSize)
@@ -79,7 +86,7 @@ class ADAMRDDFunctions[T <% SpecificRecord: Manifest](rdd: RDD[T]) extends Seria
     val recordToSave = rdd.map(p => (null, p))
     // Save the values to the ADAM/Parquet file
     recordToSave.saveAsNewAPIHadoopFile(filePath,
-      classOf[java.lang.Void], manifest[T].runtimeClass.asInstanceOf[Class[T]], classOf[ParquetOutputFormat[T]],
+      classOf[java.lang.Void], manifest[T].runtimeClass.asInstanceOf[Class[T]], classOf[AvroParquetOutputFormat],
       ContextUtil.getConfiguration(job))
     // Return the origin rdd
     rdd
@@ -216,8 +223,7 @@ class ADAMRecordRDDFunctions(rdd: RDD[ADAMRecord]) extends ADAMSequenceDictionar
    * @return A dictionary describing the read groups in this RDD.
    */
   def adamGetReadGroupDictionary(): RecordGroupDictionary = {
-    val rgNames = rdd.flatMap(r => Option(r.getRecordGroupName))
-      .map(_.toString)
+    val rgNames = rdd.flatMap(RecordGroup(_))
       .distinct()
       .collect()
       .toSeq

@@ -19,7 +19,7 @@ package org.bdgenomics.adam.converters
 
 import net.sf.samtools.{ SAMReadGroupRecord, SAMRecord }
 
-import org.bdgenomics.adam.avro.ADAMRecord
+import org.bdgenomics.formats.avro.ADAMRecord
 import scala.collection.JavaConverters._
 import org.bdgenomics.adam.models.{ SequenceRecord, Attribute, RecordGroupDictionary, SequenceDictionary }
 import org.bdgenomics.adam.util.AttributeUtils
@@ -153,13 +153,9 @@ class SAMRecordConverter extends Serializable {
 
     val recordGroup: SAMReadGroupRecord = samRecord.getReadGroup
     if (recordGroup != null) {
-      Option(recordGroup.getRunDate) match {
-        case Some(date) => builder.setRecordGroupRunDateEpoch(date.getTime)
-        case None       =>
-      }
-      recordGroup.getId
-      builder.setRecordGroupId(readGroups(recordGroup.getReadGroupId))
-        .setRecordGroupName(recordGroup.getReadGroupId)
+      Option(recordGroup.getRunDate).foreach(date => builder.setRecordGroupRunDateEpoch(date.getTime))
+
+      builder.setRecordGroupName(recordGroup.getReadGroupId)
         .setRecordGroupSequencingCenter(recordGroup.getSequencingCenter)
         .setRecordGroupDescription(recordGroup.getDescription)
         .setRecordGroupFlowOrder(recordGroup.getFlowOrder)

@@ -21,7 +21,7 @@ import scala.collection.JavaConversions._
 import net.sf.samtools.{ TextCigarCodec, CigarOperator }
 import scala.collection.mutable.ListBuffer
 import scala.collection.SortedMap
-import org.bdgenomics.adam.avro.ADAMRecord
+import org.bdgenomics.formats.avro.ADAMRecord
 import org.apache.spark.rdd.RDD
 
 object Base extends Enumeration with Serializable {
@@ -223,7 +223,7 @@ class PileupTraversable(reads: RDD[ADAMRecord]) extends Traversable[Pileup] with
       pileups --= locationsToFlush
     }
 
-    for (read: ADAMRecord <- reads) {
+    reads.foreach((read: ADAMRecord) => {
 
       def updateCurrentInfo(read: ADAMRecord) = {
         currentReference = Some(read.getContig.getContigName.toString)
@@ -254,7 +254,7 @@ class PileupTraversable(reads: RDD[ADAMRecord]) extends Traversable[Pileup] with
 
       // Flush all pileups before the start of this read since they are completed
       flushPileups(Some(read.getStart))
-    }
+    })
 
     // Flush any remaining pileups
     flushPileups()

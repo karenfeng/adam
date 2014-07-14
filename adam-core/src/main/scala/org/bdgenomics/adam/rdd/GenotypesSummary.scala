@@ -17,7 +17,7 @@
  */
 package org.bdgenomics.adam.rdd
 
-import org.bdgenomics.adam.avro.{ ADAMGenotypeAllele, ADAMGenotype }
+import org.bdgenomics.formats.avro.{ ADAMGenotypeAllele, ADAMGenotype }
 import org.bdgenomics.adam.rdd.GenotypesSummary.StatisticsMap
 import org.bdgenomics.adam.rich.RichADAMVariant._
 import org.apache.spark.rdd.RDD
@@ -299,9 +299,9 @@ object GenotypesSummaryFormatting {
 
   private def sortedGenotypeAlleles(stats: GenotypesSummaryCounts): Seq[List[ADAMGenotypeAllele]] = {
     def genotypeSortOrder(genotype: List[ADAMGenotypeAllele]): Int = genotype.map({
-      case ADAMGenotypeAllele.Ref    => 0
-      case ADAMGenotypeAllele.Alt    => 1
-      case ADAMGenotypeAllele.NoCall => 10 // arbitrary large number so any genotype with a NoCall sorts last.
+      case ADAMGenotypeAllele.Ref                               => 0
+      case ADAMGenotypeAllele.Alt | ADAMGenotypeAllele.OtherAlt => 1 // alt/otheralt sort to same point
+      case ADAMGenotypeAllele.NoCall                            => 10 // arbitrary large number so any genotype with a NoCall sorts last.
     }).sum
     stats.genotypesCounts.keySet.toList.sortBy(genotypeSortOrder(_))
   }

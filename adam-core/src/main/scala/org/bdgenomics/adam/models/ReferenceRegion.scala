@@ -19,7 +19,7 @@ package org.bdgenomics.adam.models
 
 import com.esotericsoftware.kryo.{ Kryo, Serializer }
 import com.esotericsoftware.kryo.io.{ Input, Output }
-import org.bdgenomics.adam.avro.{ ADAMRecord, ADAMNucleotideContigFragment }
+import org.bdgenomics.formats.avro.{ ADAMRecord, ADAMNucleotideContigFragment }
 import org.bdgenomics.adam.rdd.ADAMContext._
 import org.bdgenomics.adam.rich.RichADAMRecord
 import scala.math.{ min, max }
@@ -73,7 +73,7 @@ object ReferenceRegion {
 /**
  * Represents a contiguous region of the reference genome.
  *
- * @param refId The index of the sequence (chromosome) in the reference genome
+ * @param referenceName The name of the sequence (chromosome) in the reference genome
  * @param start The 0-based residue-coordinate for the start of the region
  * @param end The 0-based residue-coordinate for the first residue <i>after</i> the start
  *            which is <i>not</i> in the region -- i.e. [start, end) define a 0-based
@@ -99,6 +99,17 @@ case class ReferenceRegion(referenceName: String, start: Long, end: Long) extend
   def merge(region: ReferenceRegion): ReferenceRegion = {
     assert(overlaps(region) || isAdjacent(region), "Cannot merge two regions that do not overlap or are not adjacent")
     hull(region)
+  }
+
+  /**
+   * Calculates the intersection of two reference regions.
+   *
+   * @param region Region to intersect with.
+   * @return A smaller reference region.
+   */
+  def intersection(region: ReferenceRegion): ReferenceRegion = {
+    assert(overlaps(region), "Cannot calculate the intersection of non-overlapping regions.")
+    ReferenceRegion(referenceName, max(start, region.start), min(end, region.end))
   }
 
   /**

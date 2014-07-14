@@ -18,7 +18,7 @@
 package org.bdgenomics.adam.models
 
 import org.scalatest._
-import org.bdgenomics.adam.avro.{ ADAMContig, ADAMRecord }
+import org.bdgenomics.formats.avro.{ ADAMContig, ADAMRecord }
 
 class ReferenceRegionSuite extends FunSuite {
 
@@ -207,6 +207,22 @@ class ReferenceRegionSuite extends FunSuite {
     assert(r.referenceName === "chrM")
     assert(r.start === 5L)
     assert(r.end === 10L)
+  }
+
+  test("intersection fails on non-overlapping regions") {
+    intercept[AssertionError] {
+      ReferenceRegion("chr1", 1L, 10L).intersection(ReferenceRegion("chr1", 11L, 20L))
+    }
+    intercept[AssertionError] {
+      ReferenceRegion("chr1", 1L, 10L).intersection(ReferenceRegion("chr2", 1L, 10L))
+    }
+  }
+
+  test("compute intersection") {
+    val overlapRegion = ReferenceRegion("chr1", 1L, 10L).intersection(ReferenceRegion("chr1", 5L, 15L))
+    assert(overlapRegion.referenceName === "chr1")
+    assert(overlapRegion.start === 5L)
+    assert(overlapRegion.end === 10L)
   }
 
   def region(refName: String, start: Long, end: Long): ReferenceRegion =

@@ -29,7 +29,6 @@
     </properties>
 
     <modules>
-        <module>adam-format</module>
         <module>adam-core</module>
         <module>adam-cli</module>
     </modules>
@@ -284,6 +283,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.bdgenomics.bdg-formats</groupId>
+                <artifactId>bdg-formats</artifactId>
+                <version>0.1.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>1.3.2</version>
@@ -331,12 +335,26 @@
                         <groupId>org.sonatype.sisu.inject</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-core_${scala.artifact.suffix}</artifactId>
                 <version>${spark.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.hadoop</groupId>
+                        <artifactId>hadoop-client</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.hadoop</groupId>
+                        <artifactId>hadoop-mapreduce</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.avro</groupId>
@@ -404,6 +422,11 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>com.netflix.servo</groupId>
+                <artifactId>servo-core</artifactId>
+                <version>0.5.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

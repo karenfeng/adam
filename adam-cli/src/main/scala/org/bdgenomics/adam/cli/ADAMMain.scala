@@ -53,6 +53,7 @@ object ADAMMain extends Logging {
         PrintTags,
         ListDict,
         SummarizeGenotypes,
+        AlleleCount,
         BuildInformation)))
 
   private def printCommands() {
