@@ -18,7 +18,7 @@
 package org.bdgenomics.adam.models
 
 import scala.collection.mutable
-import org.bdgenomics.adam.avro.ADAMRecord
+import org.bdgenomics.formats.avro.ADAMRecord
 import org.bdgenomics.adam.rich.RichADAMRecord._
 
 object TrackedLayout {

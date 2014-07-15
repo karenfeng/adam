@@ -21,14 +21,10 @@ import fi.tkk.ics.hadoop.bam.SAMRecordWritable
 import net.sf.samtools.SAMFileHeader
 import org.apache.hadoop.io.LongWritable
 import org.apache.spark.broadcast.Broadcast
-<<<<<<< HEAD
-import org.bdgenomics.adam.avro.{
-=======
 import org.apache.spark.Logging
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import org.bdgenomics.formats.avro.{
->>>>>>> upstream/master
   ADAMPileup,
   ADAMRecord,
   ADAMNucleotideContigFragment
@@ -180,8 +176,8 @@ class ADAMRecordRDDFunctions(rdd: RDD[ADAMRecord]) extends ADAMSequenceDictionar
     def overlapsQuery(rec: ADAMRecord): Boolean =
       rec.getReadMapped &&
         rec.getContig.getContigName.toString == query.referenceName &&
-        rec.start < query.end &&
-        rec.start + rec.referenceLength > query.start
+        rec.getStart < query.end &&
+        rec.getStart + rec.referenceLength > query.start
     rdd.filter(overlapsQuery)
   }
 
