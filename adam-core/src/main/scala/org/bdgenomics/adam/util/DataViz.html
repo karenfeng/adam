@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
@@ -32,34 +31,54 @@
     </style>
 </head>
 <body>
-<h1>Genome visualization for ADAM</h1>
-<h2>Current reference region: </h2>
-<span id="moveLeft">
-    <input name="Move left button"
-           type="button"
-           value="<--"
-           onclick="moveLeft()"/>
-</span>
-<span id="zoomIn">
-    <input name="Zoom in button"
-           type="button"
-           value="++"
-           onclick="zoomIn()"/>
-</span>
-<span id="zoomOut">
-    <input name="Zoom out button"
-           type="button"
-           value="--"
-           onclick="zoomOut()"/>
-</span>
-<span id="moveRight">
-    <input name="Move right button"
-           type="button"
-           value="-->"
-           onclick="moveRight()"/>
-</span>
-<br>
-<script src="DataViz.js">
-</script>
+    <h1>Genome visualization for ADAM</h1>
+    <h2>Current reference region: </h2>
+        <span id="moveLeft">
+            <input name="Move left button"
+                   type="button"
+                   value="LEFT"
+                   onclick="moveLeft()"/>
+        </span>
+        <span id="zoomIn">
+            <input name="Zoom in button"
+                   type="button"
+                   value="IN"
+                   onclick="zoomIn()"/>
+        </span>
+        <span id="zoomOut">
+            <input name="Zoom out button"
+                   type="button"
+                   value="OUT"
+                   onclick="zoomOut()"/>
+        </span>
+        <span id="moveRight">
+            <input name="Move right button"
+                   type="button"
+                   value="RIGHT"
+                   onclick="moveRight()"/>
+        </span>
+    <br>
+    <script src="js/libs/jquery-1.10.2.min.js"></script>
+    <script src="js/libs/handlebars-1.0.0.js"></script>
+    <script src="js/libs/ember.js"></script>
+    <script src="js/libs/ember-data.js"></script>
+    <script src="js/application.js"></script>
+    <!--<script data-template-name="reads" src="DataViz.js"></script>-->
+    <script type="text/x-handlebars" data-template-name="reads">
+        <svg width="400" height="110">
+            {{#each}}
+                {{readBox read}}
+            {{/each}}
+        </svg>
+    </script>
+    <!--<script type="text/x-handlebars" data-template-name="reads">
+        <ul id="read-list">
+            {{#each}}
+            <li>
+                I am a read with the name: {{name}} at x: {{x}}, y: {{y}}, with width: {{w}} and height: {{y}}
+            </li>
+            {{/each}}
+        </ul>
+    </script>-->
 </body>
 </html>

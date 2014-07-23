@@ -9,7 +9,16 @@ var svgContainer = d3.select("body").append("svg")
                                     .attr("height", height);
 
 // Get the reads data
-d3.tsv("reads.tsv", function(error, data) {
+/*d3.tsv("reads.tsv", function(error, data) {
+    data.forEach(function(d) {
+        d.readName = d.readName;
+        d.x = +d.x;
+        d.y = +d.y;
+        d.w = +d.w;
+        d.h = +d.h;
+    });*/
+
+d3.json(Reads, function(error,data)) {
     data.forEach(function(d) {
         d.readName = d.readName;
         d.x = +d.x;
@@ -18,10 +27,12 @@ d3.tsv("reads.tsv", function(error, data) {
         d.h = +d.h;
     });
 
+
     // Add the rectangles
     svgContainer.append("g")
                 .selectAll("rect")
-                .data(data)
+                //.data(data)
+                .data(Reads)
                 .enter()
                 .append("rect")
                 .attr("x", (function(d) { return d.x; }))

@@ -17,25 +17,27 @@
  */
 package org.bdgenomics.adam.cli
 
-import org.kohsuke.args4j.{ Option => Args4jOption, Argument }
-import org.apache.spark.SparkContext
-import org.apache.hadoop.mapreduce.Job
 import java.util.logging.Level
 import java.util.regex.Pattern
+
+import org.apache.hadoop.mapreduce.Job
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import java.awt._
-import java.awt.image.BufferedImage
-import javax.imageio.ImageIO
-import scala.math._
-import java.io.File
-import scala.Some
-import org.bdgenomics.adam.models.{ TrackedLayout, ReferenceRegion, SequenceDictionary }
-import org.bdgenomics.adam.rdd.ADAMContext._
-import org.bdgenomics.adam.util.ParquetLogger
-import org.bdgenomics.adam.projections.Projection
-import org.bdgenomics.formats.avro.ADAMRecord
+import org.bdgenomics.adam.models.{ ReferenceRegion, TrackedLayout }
 import org.bdgenomics.adam.projections.ADAMRecordField._
-import java.io.PrintWriter
+import org.bdgenomics.adam.projections.Projection
+import org.bdgenomics.adam.rdd.ADAMContext._
+import org.bdgenomics.adam.util.{ ParquetLogger, HelloHandler }
+import org.bdgenomics.formats.avro.ADAMRecord
+import org.kohsuke.args4j.{ Argument, Option => Args4jOption }
+
+import scala.math._
+
+import org.eclipse.jetty.server.Handler
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.handler.DefaultHandler
+import org.eclipse.jetty.server.handler.HandlerList
+import org.eclipse.jetty.server.handler.ResourceHandler
 
 object VizReads extends ADAMCommandCompanion {
   val commandName: String = "viz"
@@ -58,19 +60,14 @@ object VizReads extends ADAMCommandCompanion {
   }
 
   def draw(region: ReferenceRegion, layout: TrackedLayout) {
+    val regInfo = (region.referenceName, region.start, region.end)
 
-    val infoWriter = new PrintWriter(new File("/Users/karen/Desktop/info.tsv"))
-    infoWriter.println("refName\tstart\tend")
-    infoWriter.println(region.referenceName + "\t" + region.start + "\t" + region.end)
-    infoWriter.close()
-
-    val readWriter = new PrintWriter(new File("/Users/karen/Desktop/reads.tsv"))
     val height = 400
     val width = 400
 
     val base = 10
     val trackHeight = min(20, (height - base) / (layout.numTracks + 1))
-    readWriter.println("readName\tx\ty\tw\th")
+    var trackInfo = new scala.collection.mutable.ListBuffer[(String, Int, Int, Int, Int)]
 
     // draws a box for each read, in the appropriate track.
     for ((rec, track) <- layout.trackAssignments) {
@@ -82,11 +79,24 @@ object VizReads extends ADAMCommandCompanion {
       val rxwf = rec.referenceLength.toDouble / region.width.toDouble
       val rw: Int = max(round(rxwf * width) - 1, 1).toInt // at least make it one-pixel wide.
 
-      val readName = rec.getReadName
-
-      readWriter.println(f"$readName%s\t$rx1%d\t$ry1%d\t$rw%d\t$trackHeight%d")
+      trackInfo += ((rec.getReadName, rx1, ry1, rw, trackHeight))
     }
-    readWriter.close()
+
+    val server = new Server(8080)
+    val resource_handler = new ResourceHandler()
+    // Configure the ResourceHandler. Setting the resource base indicates where the files should be served out of.
+    // In this example it is the current directory but it can be configured to anything that the jvm has access to.
+    resource_handler.setDirectoriesListed(true)
+    resource_handler.setWelcomeFiles(Array("adam-core/src/main/scala/org/bdgenomics/adam/util/DataViz.html"))
+    resource_handler.setResourceBase(".")
+
+    // Add the ResourceHandler to the server.
+    val handlers = new HandlerList()
+    handlers.setHandlers(Array(resource_handler, new DefaultHandler()))
+    server.setHandler(handlers)
+    server.start()
+    println("View at http://localhost:8080/")
+    server.join()
   }
 }
 
