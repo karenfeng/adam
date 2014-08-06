@@ -150,6 +150,28 @@ class ADAMSpecificRecordSequenceDictionaryRDDAggregator[T <% SpecificRecord: Man
 class AlignmentRecordRDDFunctions(rdd: RDD[AlignmentRecord]) extends ADAMSequenceDictionaryRDDAggregator[AlignmentRecord](rdd) {
 
   /**
+   * Calculates the subset of the RDD whose AlignmentRecords overlap the corresponding
+   * query ReferenceRegion.  Equality of the reference sequence (to which these are aligned)
+   * is tested by string equality of the names.  AlignmentRecords whose 'getReadMapped' method
+   * return 'false' are ignored.
+   *
+   * The end of the record against the reference sequence is calculated from the cigar string
+   * using the ADAMContext.referenceLengthFromCigar method.
+   *
+   * @param query The query region, only records which overlap this region are returned.
+   * @return The subset of ADAMRecords (corresponding to either primary or secondary alignments) that
+   *         overlap the query region.
+   */
+  def filterByOverlappingRegion(query: ReferenceRegion): RDD[AlignmentRecord] = {
+    def overlapsQuery(rec: AlignmentRecord): Boolean =
+      rec.getReadMapped &&
+        rec.getContig.getContigName.toString == query.referenceName &&
+        rec.getStart < query.end &&
+        rec.getEnd > query.start
+    rdd.filter(overlapsQuery)
+  }
+
+  /**
    * Saves an RDD of ADAM read data into the SAM/BAM format.
    *
    * @param filePath Path to save files to.
